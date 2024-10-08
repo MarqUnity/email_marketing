@@ -16,18 +16,18 @@ def send_campaign_emails(campaign):
     for schedule_entry in campaign_doc.get("campaign_schedules"):
         # Calculate the scheduled datetime
         send_after_days = schedule_entry.send_after_days or 0
-        send_time = schedule_entry.send_time or '00:00:00'
+        custom_send_time = schedule_entry.custom_send_time or '00:00:00'
 
         scheduled_date = add_days(campaign.start_date, send_after_days)
-        scheduled_datetime = get_datetime(f"{scheduled_date} {send_time}")
+        scheduled_datetime = get_datetime(f"{scheduled_date} {custom_send_time}")
 
         # Check if the email is due to be sent and not already sent
-        if now_datetime() >= scheduled_datetime and not schedule_entry.get('email_sent'):
+        if now_datetime() >= scheduled_datetime and not schedule_entry.get('custom_email_sent'):
             # Send the email
             send_mail(schedule_entry, campaign)
 
             # Mark the schedule entry as sent
-            schedule_entry.db_set('email_sent', True)
+            schedule_entry.db_set('custom_email_sent', True)
 
 def send_scheduled_email_campaigns():
     # Get all Email Campaigns that are not completed or unsubscribed
