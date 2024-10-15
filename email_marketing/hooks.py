@@ -263,12 +263,11 @@ fixtures = [
 
 scheduler_events = {
     "cron": {
-        "* * * * *": [
+        "*/5 * * * *": [
             "email_marketing.email_campaign.send_scheduled_email_campaigns"
         ]
     }
 }
-
 
 
 # email_marketing/hooks.py
