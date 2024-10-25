@@ -1,3 +1,3 @@
-__version__ = "0.0.2"
+__version__ = "0.0.3s"
 
-from .overrides import email_campaign 
+from .overrides import email_campaign

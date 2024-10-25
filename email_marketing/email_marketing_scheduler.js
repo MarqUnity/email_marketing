@@ -1,4 +1,4 @@
-// email_marketing/public/js/email_campaign.js
+// email_marketing/public/js/email_marketing.js
 
 frappe.ui.form.on('Email Campaign', {
     send_now: function(frm) {
@@ -6,7 +6,7 @@ frappe.ui.form.on('Email Campaign', {
             'Are you sure you want to send the first email now?',
             function() {
                 frappe.call({
-                    method: 'email_marketing.email_campaign.send_now',
+                    method: 'email_marketing.email_marketing.send_now',
                     args: {
                         campaign_name: frm.doc.name
                     },

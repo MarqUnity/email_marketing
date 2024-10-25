@@ -243,40 +243,39 @@ app_license = "mit"
 # }
 
 
-# email_marketing/hooks.py
+# fixtures = [
+#     {
+#         'dt': 'DocType',
+#         'filters': [
+#             [
+#                 'name', 'in', [
+#                     'Email Campaign',
+#                     'Campaign Email Schedule'
+#                 ]
+#             ]
+#         ]
+#     }
+# ]
 
 fixtures = [
-    {
-        'dt': 'DocType',
-        'filters': [
-            [
-                'name', 'in', [
-                    'Email Campaign',
-                    'Campaign Email Schedule'
-                ]
-            ]
-        ]
-    }
+    {"dt": "Custom Field"}
 ]
 
-# email_marketing/hooks.py
 
 scheduler_events = {
     "cron": {
         "*/5 * * * *": [
-            "email_marketing.email_campaign.send_scheduled_email_campaigns"
+            "email_marketing.email_marketing_scheduler.send_scheduled_email_campaigns"
         ]
     }
 }
 
-
-# email_marketing/hooks.py
-
+#"email_marketing.email_campaign.send_scheduled_email_campaigns"
 # override_doctype_class = {
 #     "Email Campaign": "email_marketing.overrides.email_campaign.CustomEmailCampaign"
 # }
 
-# email_marketing/hooks.py
+
 
 # override_whitelisted_methods = {
 #     "erpnext.crm.doctype.email_campaign.email_campaign.send_scheduled_email_campaigns": "email_marketing.email_campaign.send_scheduled_email_campaigns"
