@@ -60,7 +60,7 @@ def send_scheduled_email_campaigns():
         except Exception as e:
             # Log any errors related to processing the entire campaign
             frappe.logger().error(f"Error processing campaign '{campaign_data.name}': {str(e)}")
-    frappe.db.commit() # required when testing from console debugger
+    #frappe.db.commit() # required when testing from console debugger
 
 
 @frappe.whitelist()
