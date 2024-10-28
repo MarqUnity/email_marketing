@@ -1,3 +1,6 @@
+## Work In Progress
+Requires custom fields to be created. App Will be merged into CRM Frappe hopefully in future. 
+
 ### Email Marketing
 
 Additions to Email Marketing Functionality
