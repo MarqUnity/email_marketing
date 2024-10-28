@@ -1,6 +1,18 @@
 ## Work In Progress
 Requires custom fields to be created. App Will be merged into CRM Frappe hopefully in future. 
 
+Current Development:
+- Automatic Leads reference import with "Import Subscribers" action
+- Separate email sending for email groups
+- Group members reference linked as doc for email template (e.g. {{doc.first_name}} if subscriber import was from FCRM Lead)
+- Time-based email scheduling
+- Email campaigns can be customised after creation
+
+Still pending:
+- Proper unsubscribe handling for email group campaigns
+- SMS support
+- Filtering email group members
+
 ### Email Marketing
 
 Additions to Email Marketing Functionality
