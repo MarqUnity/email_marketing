@@ -6,7 +6,7 @@ frappe.ui.form.on('Email Campaign', {
             'Are you sure you want to send the first email now?',
             function() {
                 frappe.call({
-                    method: 'email_marketing.email_marketing.send_now',
+                    method: 'email_marketing.email_marketing_scheduler.send_now',
                     args: {
                         campaign_name: frm.doc.name
                     },
