@@ -2,6 +2,8 @@ import frappe
 from erpnext.crm.doctype.email_campaign.email_campaign import EmailCampaign
 import erpnext.crm.doctype.email_campaign.email_campaign as email_campaign_module
 from frappe.core.doctype.communication.email import make
+from frappe.utils import get_url
+from frappe.utils.verified_command import get_signed_params
 
 def custom_validate(self):
     # Your custom validate logic
@@ -39,20 +41,25 @@ def custom_update_status(self):
     elif self.status !=  "In Progress":
         self.status = "In Progress"
 
+
+
 def custom_send_mail(entry, email_campaign):
-    # Initialize members list
     members = []
     if email_campaign.email_campaign_for == "Email Group":
-        # Get all email group members
+        # Add unsubscribed=0 to the filters to exclude unsubscribed members
         members = frappe.get_all(
             "Email Group Member",
-            filters={"email_group": email_campaign.get("recipient")},
+            filters={
+                "email_group": email_campaign.get("recipient"),
+                "unsubscribed": 0  # Only get members who haven't unsubscribed
+            },
             fields=["*"]
         )
     else:
-        # For a single recipient, create a member-like dictionary
         recipient_email = frappe.db.get_value(
-            email_campaign.email_campaign_for, email_campaign.get("recipient"), "email_id"
+            email_campaign.email_campaign_for, 
+            email_campaign.get("recipient"), 
+            "email_id"
         )
         members.append({
             "name": None,
@@ -60,19 +67,23 @@ def custom_send_mail(entry, email_campaign):
             "custom_reference": None
         })
     
+    # Skip if no active members
+    if not members:
+        frappe.logger().info(f"No active members found for campaign '{email_campaign.name}'")
+        return
+    
     email_template = frappe.get_doc("Email Template", entry.get("email_template"))
     sender = frappe.db.get_value("User", email_campaign.get("sender"), "email")
     
-    # Loop through all members (even if only one)
     for member in members:
         recipient = member["email"]
         
+        # Prepare the context for template rendering
         if member.get("custom_reference"):
-            # Assuming the DocType is 'Lead'; modify as needed
             try:
                 doc = frappe.get_doc(member["custom_reference_type"], member["custom_reference"])
             except frappe.DoesNotExistError:
-                frappe.log_error(f"Lead '{member['custom_reference']}' not found for member '{member['name']}'")
+                frappe.log_error(f"Reference '{member['custom_reference']}' not found for member '{member['name']}'")
                 doc = frappe._dict({'email': recipient})
         else:
             if member["name"]:
@@ -81,22 +92,56 @@ def custom_send_mail(entry, email_campaign):
                 doc = frappe._dict({'email': recipient})
         
         context = {"doc": doc}
+        
+        # For email group recipients, create newsletter-style unsubscribe link
+        # There may be a better way to do this, but I didn't want to use the frappe.email_send directly as I don't think it uses the email queue
 
-        # Send the email to the individual recipient
+        if email_campaign.email_campaign_for == "Email Group":
+            params = {
+                "email": recipient,
+                "doctype": "Newsletter",  
+                "name": member.name,
+                "email_group": email_campaign.get("recipient")
+            }
+            signed_params = get_signed_params(params)
+            unsubscribe_url = get_url(f"/unsubscribe?{signed_params}")
+            
+            # Add unsubscribe link to the content
+            unsubscribe_html = f"""
+            <div class="email-unsubscribe">
+                <p style="margin: 15px 0;">
+                    <a href="{unsubscribe_url}" style="color: #8899a6; text-decoration: underline;">
+                        Click here to manage your email subscriptions
+                    </a>
+                </p>
+            </div>
+            """
+            
+            # Render the original content
+            content = frappe.render_template(email_template.response_, context)
+            
+            # Add unsubscribe link if not already present
+            if 'email-unsubscribe' not in content:
+                content = content + unsubscribe_html
+        else:
+            content = frappe.render_template(email_template.response_, context)
+
+        # Use make to create the communication record and send email
         comm = make(
             doctype="Email Campaign",
             name=email_campaign.name,
             subject=frappe.render_template(email_template.subject, context),
-            content=frappe.render_template(email_template.response_, context),
+            content=content,
             sender=sender,
-            recipients=[recipient],  # Send to one recipient
+            recipients=[recipient],
             communication_medium="Email",
             sent_or_received="Sent",
             send_email=True,
-            email_template=email_template.name,
+            email_template=email_template.name
         )
-        frappe.log("sending email now")
+        
     return comm
+
 
 
 # Monkey-patch the methods

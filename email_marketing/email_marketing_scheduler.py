@@ -37,7 +37,7 @@ def send_campaign_emails(campaign):
             campaign.save()
 
 
-
+@frappe.whitelist()
 def send_scheduled_email_campaigns():
     # Get all Email Campaigns that are not completed or unsubscribed
     campaigns = frappe.get_all('Email Campaign', filters={
@@ -61,7 +61,7 @@ def send_scheduled_email_campaigns():
             # Log any errors related to processing the entire campaign
             frappe.logger().error(f"Error processing campaign '{campaign_data.name}': {str(e)}")
     #frappe.db.commit() # required when testing from console debugger
-
+    return {"message": "Scheduled campaigns processed successfully"}
 
 @frappe.whitelist()
 def send_now(campaign_name):
