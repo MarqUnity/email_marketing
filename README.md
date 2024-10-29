@@ -7,9 +7,9 @@ Current Development:
 - Group members reference linked as doc for email template (e.g. {{doc.first_name}} if subscriber import was from FCRM Lead)
 - Time-based email scheduling
 - Email campaigns can be customised after creation
+- Proper unsubscribe handling for email group campaigns
 
 Still pending:
-- Proper unsubscribe handling for email group campaigns
 - SMS support
 - Filtering email group members
 
