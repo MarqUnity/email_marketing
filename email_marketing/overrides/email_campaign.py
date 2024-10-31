@@ -41,6 +41,8 @@ def custom_update_status(self):
     elif self.status !=  "In Progress":
         self.status = "In Progress"
 
+
+
 def custom_send_mail(entry, email_campaign):
     members = []
     if email_campaign.email_campaign_for == "Email Group":
@@ -93,12 +95,13 @@ def custom_send_mail(entry, email_campaign):
         
         # For email group recipients, create newsletter-style unsubscribe link
         # There may be a better way to do this, but I didn't want to use the frappe.email_send directly as I don't think it uses the email queue
+
         if email_campaign.email_campaign_for == "Email Group":
-            group = frappe.get_doc("Email Group", email_campaign.get("recipient"))
             params = {
                 "email": recipient,
-                "email_group": email_campaign.get("recipient"),
-                "name": group.name
+                "doctype": "Newsletter",  
+                "name": member.name,
+                "email_group": email_campaign.get("recipient")
             }
             signed_params = get_signed_params(params)
             unsubscribe_url = get_url(f"/unsubscribe?{signed_params}")
@@ -134,11 +137,12 @@ def custom_send_mail(entry, email_campaign):
             communication_medium="Email",
             sent_or_received="Sent",
             send_email=True,
-            email_template=email_template.name,
-            add_unsubscribe_link=False if email_campaign.email_campaign_for == "Email Group" else True
+            email_template=email_template.name
         )
         
     return comm
+
+
 
 # Monkey-patch the methods
 EmailCampaign.validate = custom_validate
