@@ -96,8 +96,8 @@ def custom_send_mail(entry, email_campaign):
             group = frappe.get_doc("Email Group", email_campaign.get("recipient"))
             unsubscribe_params = {
                 "email": recipient,
-                "email_group": email_campaign.get("recipient"),
-                "name": group.name  # Use the email group name
+                "doctype": "Email Campaign",  # This helps identify the source
+                "name": email_campaign.get("recipient") #email group
             }
 
             content = frappe.render_template(email_template.response_, context)
