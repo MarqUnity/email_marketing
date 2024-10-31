@@ -28,7 +28,7 @@ def validate_start_date(self):
     campaign_start_date = getdate(self.start_date)
     current_date = getdate(nowdate())
     if campaign_start_date < current_date:
-        frappe.throw(_("Start Date cannot be before the current date"))
+        frappe.throw(("Start Date cannot be before the current date"))
 
 def custom_update_status(self):
     all_sent = True
@@ -40,8 +40,6 @@ def custom_update_status(self):
         self.status = "Completed"
     elif self.status !=  "In Progress":
         self.status = "In Progress"
-
-
 
 def custom_send_mail(entry, email_campaign):
     members = []
