@@ -94,7 +94,7 @@ def custom_send_mail(entry, email_campaign):
         # For email group recipients, use newsletter-style unsubscribe
         if email_campaign.email_campaign_for == "Email Group":
             group = frappe.get_doc("Email Group", email_campaign.get("recipient"))
-            unsubscribe_params = {
+            unsubscribe_params = { # pretty sure these are just overidden in frappe/frappe/email/queue.py
                 "email": recipient,
                 "doctype": "Email Campaign",  # This helps identify the source
                 "name": email_campaign.get("recipient") #email group

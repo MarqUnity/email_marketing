@@ -15,10 +15,12 @@ def custom_get_current_groups(name):
             fields=["email_group"],
             filters={"parent": name, "parenttype": "Newsletter"},
         )
-    else:
-        # Email Campaign or direct email group behavior
-        return [{"email_group": email_group}] if email_group else []
+    elif doctype == "Email Campaign":
+        # Get the email group from the campaign
+        campaign = frappe.get_doc("Email Campaign", name)
+        if campaign.email_campaign_for == "Email Group":
+            return [{"email_group": campaign.recipient}]
+    return []
 
-def override_unsubscribe():
-    """Apply the override to unsubscribe's get_current_groups"""
-    unsubscribe_module.get_current_groups = custom_get_current_groups
+# Monkey-patch
+unsubscribe_module.get_current_groups = custom_get_current_groups
