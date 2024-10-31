@@ -113,9 +113,10 @@ def custom_send_mail(entry, email_campaign):
             sender=sender,
             reference_doctype="Email Campaign",
             reference_name=email_campaign.name,
+            add_unsubscribe_link=1, # hardcoded, should be a prop of email campaign
             unsubscribe_method="/unsubscribe" if email_campaign.email_campaign_for == "Email Group" else None,
             unsubscribe_params=unsubscribe_params,
-            unsubscribe_message=None,  # Let the system use default message
+            unsubscribe_message="Unsubscribe",  # hardcoded, should be a prop of email campaign
             delayed=True,  # Use email queue
             queue_separately=True,  # Queue each email separately for better tracking
             send_priority=1,
@@ -124,7 +125,7 @@ def custom_send_mail(entry, email_campaign):
             cc=None,
             bcc=None,
             message_id=None,
-            with_container=True  # Wrap email in a styled container
+            with_container=False  # Wrap email in a styled container
         )
     
     return True  # Indicate successful queueing
