@@ -91,56 +91,43 @@ def custom_send_mail(entry, email_campaign):
         
         context = {"doc": doc}
         
-        # For email group recipients, create newsletter-style unsubscribe link
-        # There may be a better way to do this, but I didn't want to use the frappe.email_send directly as I don't think it uses the email queue
-
+        # For email group recipients, use newsletter-style unsubscribe
         if email_campaign.email_campaign_for == "Email Group":
-            params = {
+            group = frappe.get_doc("Email Group", email_campaign.get("recipient"))
+            unsubscribe_params = {
                 "email": recipient,
-                "doctype": "Newsletter",  
-                "name": member.name,
-                "email_group": email_campaign.get("recipient")
+                "email_group": email_campaign.get("recipient"),
+                "name": group.name  # Use the email group name
             }
-            signed_params = get_signed_params(params)
-            unsubscribe_url = get_url(f"/unsubscribe?{signed_params}")
-            
-            # Add unsubscribe link to the content
-            unsubscribe_html = f"""
-            <div class="email-unsubscribe">
-                <p style="margin: 15px 0;">
-                    <a href="{unsubscribe_url}" style="color: #8899a6; text-decoration: underline;">
-                        Click here to manage your email subscriptions
-                    </a>
-                </p>
-            </div>
-            """
-            
-            # Render the original content
+
             content = frappe.render_template(email_template.response_, context)
-            
-            # Add unsubscribe link if not already present
-            if 'email-unsubscribe' not in content:
-                content = content + unsubscribe_html
         else:
             content = frappe.render_template(email_template.response_, context)
+            unsubscribe_params = None
 
-        # Use make to create the communication record and send email
-        comm = make(
-            doctype="Email Campaign",
-            name=email_campaign.name,
-            subject=frappe.render_template(email_template.subject, context),
-            content=content,
-            sender=sender,
+        # Use frappe.sendmail with proper params
+        frappe.sendmail(
             recipients=[recipient],
-            communication_medium="Email",
-            sent_or_received="Sent",
-            send_email=True,
-            email_template=email_template.name
+            subject=frappe.render_template(email_template.subject, context),
+            message=content,
+            sender=sender,
+            reference_doctype="Email Campaign",
+            reference_name=email_campaign.name,
+            unsubscribe_method="/unsubscribe" if email_campaign.email_campaign_for == "Email Group" else None,
+            unsubscribe_params=unsubscribe_params,
+            unsubscribe_message=None,  # Let the system use default message
+            delayed=True,  # Use email queue
+            queue_separately=True,  # Queue each email separately for better tracking
+            send_priority=1,
+            template=None,  # We've already rendered the template
+            attachments=None,  # Add if needed
+            cc=None,
+            bcc=None,
+            message_id=None,
+            with_container=True  # Wrap email in a styled container
         )
-        
-    return comm
-
-
+    
+    return True  # Indicate successful queueing
 
 # Monkey-patch the methods
 EmailCampaign.validate = custom_validate
