@@ -130,9 +130,14 @@ def custom_send_mail(entry, email_campaign):
     
     return True  # Indicate successful queueing
 
+# Override the function to do nothing
+def do_nothing():
+    frappe.logger().info("send_email_to_leads_or_contacts was called but is overridden to do nothing.")
+
 # Monkey-patch the methods
 EmailCampaign.validate = custom_validate
 EmailCampaign.copy_schedule_entries = copy_schedule_entries
 EmailCampaign.validate_start_date = validate_start_date
 EmailCampaign.update_status = custom_update_status
+EmailCampaign.send_email_to_leads_or_contacts = do_nothing
 email_campaign_module.send_mail = custom_send_mail
