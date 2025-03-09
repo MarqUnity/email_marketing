@@ -25,3 +25,12 @@ scheduler_events = {
         ]
     }
 }
+
+# Override ERPNext's scheduler events to prevent duplicate email sending
+scheduler_events_override = {
+    "daily": {
+        "remove": [
+            "erpnext.crm.doctype.email_campaign.email_campaign.send_email_to_leads_or_contacts"
+        ]
+    }
+}
